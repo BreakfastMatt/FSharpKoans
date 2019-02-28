@@ -108,33 +108,33 @@ module ``03: Putting the Function into Functional Programming`` =
     [<Test>]
     let ``15 A function is executed when it is called, NOT when it is defined or referenced (Part 1).`` () =
         let f a =
-            failwith "An exception will be thrown as soon as this is executed."
+            failwith "An exception will be thrown as soon as this is executed." //failwith is a built in F# function
             a + 2
-        ___ |> should be ofType<int -> int>
+        f |> should be ofType<int -> int> //function is referenced here, this will work.  (Wouldn't work if it was called)
 
     [<Test>]
     let ``16 A function is executed when it is called, NOT when it is defined or referenced (Part 2).`` () =
         (fun () ->
             let f a =
-                failwith "An exception will be thrown as soon as this is executed."
+                failwith "An exception will be thrown as soon as this is executed." //what is this line doing.  
                 a + 2
-            FILL_ME__IN |> should equal 1234
+            f 1232 |> should equal 1234
         ) |> should throw typeof<System.Exception>
 
     [<Test>]
     let ``17 Two names can be bound to the same value`` () =
         let f x = x + 2
         let y = f
-        y 20 |> should equal ___
+        y 20 |> should equal 22
 
 
     [<Test>]
     let ``18 Shadowing and functions`` () =
         let a = 25
-        let f () = a + 10
+        let f () = a + 10 //35
         let a = 99
-        a |> should equal __
-        f () |> should equal __
+        a |> should equal 99
+        f () |> should equal 35
 
     [<Test>]
     let ``19 Nesting functions`` () =
@@ -142,20 +142,20 @@ module ``03: Putting the Function into Functional Programming`` =
             let triple x = x * 3
             let addOne x = x + 1
             addOne (triple x)
-        hailstone 5 |> should equal __
+        hailstone 5 |> should equal 16
 
     [<Test>]
     let ``20 Functions have types`` () =
-        let a x y = x + "cabbage" + y
-        let b r = 50.0 / r
-        a |> should be ofType<FILL_ME_IN>
-        b |> should be ofType<FILL_ME_IN>
+        let a x y = x + "cabbage" + y // let a = fun x -> fun y -> x + "cabbage" + y
+        let b r = 50.0 / r 
+        a |> should be ofType<string -> string -> string>  //x is string -> y is string -> x+"cabbage"+y is string.
+        b |> should be ofType<float -> float> //r is float -> 50.0/r is float.
 
 
     [<Test>]
     let ``21 Passing a function as a parameter`` () =
     (*
-        A function which accepts a function as input is called a "higher-order"
+        A function which accepts a function as input is called a "higher-order"    
         function.
 
         If you think that passing a function as a parameter is a bit "weird",
@@ -164,27 +164,29 @@ module ``03: Putting the Function into Functional Programming`` =
         
         If you can't come up with a reason, then perhaps the problem lies more
         with your current views about how programming "should" be, and not
-        with the feature of higher-order functions :).
+        with the feature of higher-order functions :).     //<<{[F in chat.]}>>
     *)
-        let somefunc x y = x + y x
-        let square v = v * v
-        somefunc 3 square |> should equal __
-        somefunc 3 ((*) 7) |> should equal __
-        somefunc 10 ((+) 8) |> should equal __
-        somefunc 5 (fun z -> z + 22) |> should equal __
+        let somefunc x y = x + y x //let somefunc = fun x -> (fun y -> x + y x) //x + y x (here y x means run function y with input x)
+        //so x + ((function y) x)
+        let square v = v * v 
+        somefunc 3 square |> should equal 12    //3 + square 3 = 3 + 9 = 12
+
+        somefunc 3 ((*) 7) |> should equal 24  //3 + (((*) 7) 3) |> equals 3 + (7*3) = 3 + 21 = 24
+        somefunc 10 ((+) 8) |> should equal 28  //10 + ((+) 8)10) = 10 + 18 = 28
+        somefunc 5 (fun z -> z + 22) |> should equal 32  // 5 + z 5
 
    (*
        Did you know that operators like +, -, =, >, and so on, are actually
        functions in disguise?
    *)
 
-    [<Test>]
+    [<Test>] 
     let ``22 Operators are functions in disguise`` () =
-        (+) 5 8 |> should equal __
-        (-) 3 5 |> should equal __
-        (/) 12 4 |> should equal __
-        (=) 93.1 93.12 |> should equal __
-        (<) "hey" "jude" |> should equal __
+        (+) 5 8 |> should equal 13
+        (-) 3 5 |> should equal -2
+        (/) 12 4 |> should equal 3
+        (=) 93.1 93.12 |> should equal false
+        (<) "hey" "jude" |> should equal true  //a b c d e f g H i J...
         // ... and other operators: >, <=, >=, <>, %, ...
 
 (*
@@ -206,10 +208,10 @@ module ``03: Putting the Function into Functional Programming`` =
     let ``23 |>, the 'pipe' operator`` () =
         let add5 a = a + 5
         let double a = a * 2
-        3 |> add5 |> double |> should equal __  // <-- start with three, add 5, then double. Readable, isn't it?
-        3 |> double |> add5 |> should equal __
-        6 |> add5 |> add5 |> should equal __
-        8 |> double |> double |> add5 |> should equal __
+        3 |> add5 |> double |> should equal 16  // <-- start with three, add 5, then double. Readable, isn't it?  //This is actually beautiful.
+        3 |> double |> add5 |> should equal 11 //add5 (double 3) = add5 6
+        6 |> add5 |> add5 |> should equal 16
+        8 |> double |> double |> add5 |> should equal 37
 
     (*
         The pipe operator takes:
@@ -217,7 +219,7 @@ module ``03: Putting the Function into Functional Programming`` =
         - a function 'a -> 'b
         ...and applies the function to the input.  It is defined as:
 
-            let (|>) x f = f x
+            let (|>) x f = f x  // 8 |> double = double 8
 
         We often use the pipe operator to make code more readable.
     *)
@@ -225,10 +227,10 @@ module ``03: Putting the Function into Functional Programming`` =
     [<Test>]
     let ``24 The output type of one pipe must be the input type to the next`` () =
         let a x = x * 2.5
-        let b x = x = 7.5
-        a |> should be ofType<FILL_ME_IN>
-        b |> should be ofType<FILL_ME_IN>
-        __ |> __ |> __ |> should equal true
+        let b x = (x = 7.5) //added brackets here to make this more readable
+        a |> should be ofType<float -> float> //x is float -> x*2.5 is float
+        b |> should be ofType<float -> bool> //(x=7.5): x is a float cause we have to compare same types and 7.5 is float, however (x=7.5) is a bool expression
+        3.0 |> a |> b |> should equal true
 
     (*
         The backwards-pipe operator takes:
@@ -236,7 +238,7 @@ module ``03: Putting the Function into Functional Programming`` =
         - an input 'a
         ...and applies the function to the input.  It is defined as:
 
-            let (<|) f x = f x
+            let (<|) f x = f x  //I don't like this     (fun x -> x*2) 5 ==> fun x -> x*2 <| 5
 
         Due to the precedence of operators in the language, it's
         sometimes slightly more readable to use <| instead of brackets.
@@ -249,7 +251,7 @@ module ``03: Putting the Function into Functional Programming`` =
         let a x =
             x = 4
         not (a 4) |> should equal false
-        (__ __ a 4) |> should equal false // <-- put <| in one of the spaces to fill in
+        (not <| a 4) |> should equal false // <-- put <| in one of the spaces to fill in
 
     (*
         The compose operator takes:
@@ -270,11 +272,11 @@ module ``03: Putting the Function into Functional Programming`` =
     let ``26 >>, the 'compose' operator`` () =
         let add5 a = a + 5
         let double a = a * 2
-        let i = add5 >> double
-        let j = double >> add5
-        let k = double >> double >> double
-        let l = j >> i
-        i 3 |> should equal __
-        j 3 |> should equal __
-        k 3 |> should equal __
-        l 3 |> should equal __
+        let i = add5 >> double//i = (a+5) * 2
+        let j = double >> add5//j = (a*2) + 5
+        let k = double >> double >> double//k = (((a * 2) * 2) * 2)
+        let l = j >> i //([(a*2) + 5]+5) * 2
+        i 3 |> should equal 16
+        j 3 |> should equal 11
+        k 3 |> should equal 24
+        l 3 |> should equal 32

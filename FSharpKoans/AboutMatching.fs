@@ -7,65 +7,69 @@ to conditionally execute code.  The first pattern (going from top to bottom) tha
 matches causes the associated code to be executed.  All non-matching patterns,
 and any patterns after the first matching pattern, are ignored.  If no pattern
 matches, then you get a MatchFailureException at runtime and you turn into a
-Sad Panda.
+Sad Panda.    
 *)
+
 
 module ``04: Match expressions`` = 
     [<Test>]
     let ``01 Basic match expression`` () =
         match 8000 with
-        | FILL_ME__IN -> "Insufficient power-level"
+        | 8000 -> "Insufficient power-level"
         ()
 
     [<Test>]
     let ``02 Match expressions are expressions, not statements`` () =
         let result =
             match 9001 with
-            | FILL_ME__IN -> // <-- use an identifier pattern here!
-                match __ + 1000 with
-                | 10001 -> "Hah! It's a palindromic number!"
+            | powa -> // <-- use an identifier pattern here!
+                match 9001 + 1000 with
+                | 10001 -> "Hah! It's a palindromic number!"//All non-matching patterns * any patterns after the first matching pattern, are ignored.
                 | x -> "Some number."
             | x -> "I should have matched the other expression."
         result |> should equal "Hah! It's a palindromic number!"
 
-    [<Test>]
-    let ``03 Shadowing in match expressions`` () =
+    [<Test>] 
+    let ``03 Shadowing in match expressions`` () = 
         let x = 213
         let y = 19
         match x with
         | 100 -> ()
-        | 19 -> ()
+        | 19 -> ()                                                          
         | y ->
-            y |> should equal __
-            x |> should equal __
-        y |> should equal __
-        x |> should equal __
+            y |> should equal 213//X was matched with y, so y (in THIS scope) is equal to x which is 213.  Therefore y in this scope is 213.
+            x |> should equal 213
+        y |> should equal 19
+        x |> should equal 213
 
     [<Test>]
     let ``04 Match order in match expressions`` () =
         let x = 213
         let y = 19
-        let z =
-            match x with
+        let z = //"Bite"
+            match x with //match 213 with
             | 100 -> "Kite"
             | 19 -> "Smite"
             | 213 -> "Bite"
             | y -> "Light"
-        let a = 
-            match x with
+        let a = //"Trite"
+            match x with //match 213 with
             | 100 -> "Kite"
             | 19 -> "Smite"
-            | y -> "Trite"
+            | y -> "Trite" //first match found, will ignore the 213 match below because of this.
             | 213 -> "Light"
-        x |> should equal __
-        y |> should equal __
-        z |> should equal __
-        a |> should equal __
+        x |> should equal 213
+        y |> should equal 19
+        z |> should equal "Bite"
+        a |> should equal "Trite"
 
     [<Test>]
     let ``05 Using a mapping function`` () =
         let mapper = function
-            | _ -> __ // write the cases for this function!
+            | 3 -> "Joey" // write the cases for this function!
+            | 8 -> "Bingo"
+            | 11 -> "Kelvin"
+            | 15 -> "Kelvin"
         mapper 3 |> should equal "Joey"
         mapper 8 |> should equal "Bingo"
         mapper 11 |> should equal "Kelvin"

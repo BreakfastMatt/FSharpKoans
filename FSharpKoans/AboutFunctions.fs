@@ -16,46 +16,48 @@ open NUnit.Framework
 *)
 
 module ``03: Putting the Function into Functional Programming`` = 
+    open System.Numerics
+
     [<Test>]
     let ``01 A function takes one input and produces one output`` () =
-        (fun a -> a + 100) __ |> should equal 2097
+        (fun a -> a + 100) 1997 |> should equal 2097
 
     [<Test>]
     let ``02 The input to a function is a pattern (Part 1).`` () =
-        (fun 7 -> 9) __ |> should equal 9
+        (fun 7 -> 9) 7 |> should equal 9
 
     [<Test>]
     let ``03 The input to a function is a pattern (Part 2).`` () =
-        (fun _ -> 75) __ |> should equal 75
+        (fun _ -> 75) "a" |> should equal 75 //wildcard accepts anything, das pretty neat.
 
     [<Test>]
     let ``04 The input to a function is a pattern (Part 3).`` () =
-        (fun (2 | 3 | 5) -> "Prime") __ |> should equal "Prime"
+        (fun (2 | 3 | 5) -> "Prime") 3 |> should equal "Prime"
 
     [<Test>]
     let ``05 A function can be bound to a name (Part 1).`` () =
         let one_third = fun ka -> ka / 3
-        __ 21 |> should equal 7
+        one_third 21 |> should equal 7
 
     [<Test>]
     let ``06 A function can be bound to a name (Part 2).`` () =
-        let pinky bleh = bleh / 3 // The syntax has changed from Part 1, but the meaning is the same
-        __ 21 |> should equal 7
-
+        let pinky bleh = bleh / 3 // The syntax has changed from Part 1, but the meaning is the same   <<[how dare you take away the fun.]>>
+        pinky 21 |> should equal 7
+         
     [<Test>]
     let ``07 A function can span multiple lines (Part 1).`` () =
         (fun zorro ->
             let k = "swash" // notice the indentation.
             let b = "buckle" // F# is whitespace-sensitive, so it is important!
             zorro + " likes to " + k + b
-        ) "Zorro the pirate" |> should equal __
+        ) "Zorro the pirate" |> should equal "Zorro the pirate likes to swashbuckle"
 
     [<Test>]
     let ``08 A function can span multiple lines (Part 2).`` () =
-        let jorus who =
+        let jorus who = //this be a function yo.
             let p = 5
-            who * p
-        jorus 12 |> should equal __
+            who * p //fun who -> who * 5
+        jorus 12 |> should equal 60
 
     [<Test>]
     let ``09 A function can span multiple lines (Part 2, expanded syntax).`` () =
@@ -64,9 +66,9 @@ module ``03: Putting the Function into Functional Programming`` =
         let jorus =
             fun who ->
                 let p = 3 in
-                    who * p
+                    who * p  //fun who -> who * 3
         in
-            jorus 12 |> should equal __
+            jorus 12 |> should equal 36
 
     // The next few are very similar.  Resist the temptation to
     // just fill out values without having any idea about what's
@@ -77,30 +79,30 @@ module ``03: Putting the Function into Functional Programming`` =
     let ``10 A function can return a function (Part 1).`` () =
         let i = fun love -> fun hate -> love - hate
         // read the above as: fun love -> (fun hate -> (love - hate))
-        let j = i 10
-        let k = j 9
-        k |> should equal __
+        let j = i 10 //love
+        let k = j 9 //hate
+        k |> should equal 1 //love - hate
 
     [<Test>]
     let ``11 A function can return a function (Part 2).`` () =
-        let funky a b = a + b
-        let j = funky 10
-        let k = j 9
-        k |> should equal __
+        let funky a b = a + b //different syntax for:  let funkay = fun a -> fun b -> a + b
+        let j = funky 10 //a
+        let k = j 9 //funky 10 9
+        k |> should equal 19
 
     [<Test>]
     let ``12 You can write a function as a one-liner (Part 1).`` () =
-        (fun ___ -> fun ___ -> __ * __) __ __ |> should equal 27
+        (fun a -> fun b -> a * b) 9 3 |> should equal 27 //fun a -> (fun b -> a * b)
 
     [<Test>]
     let ``13 You can write a function as a one-liner (Part 2).`` () =
-        (fun _____ ____ -> __ + __) __ __ |> should equal 17
+        (fun a b -> a + b) 16 1 |> should equal 17
 
     [<Test>]
     let ``14 'Multiple-argument' functions are one-input, one-output in disguise`` () =
-      let i j k = j * k
-      let j = __ 4
-      let k = __ 12
+      let i j k = j * k //i is just the name i.e. let funky j k 
+      let j = i 4
+      let k = j 12
       k |> should equal 48
 
     [<Test>]

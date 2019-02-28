@@ -108,7 +108,7 @@ module ``03: Putting the Function into Functional Programming`` =
     [<Test>]
     let ``15 A function is executed when it is called, NOT when it is defined or referenced (Part 1).`` () =
         let f a =
-            failwith "An exception will be thrown as soon as this is executed." //failwith is a built in F# function
+            failwith "An exception will be thrown as soon as this is executed." //failwith is a built in F# function that throws an exception
             a + 2
         f |> should be ofType<int -> int> //function is referenced here, this will work.  (Wouldn't work if it was called)
 
@@ -116,7 +116,7 @@ module ``03: Putting the Function into Functional Programming`` =
     let ``16 A function is executed when it is called, NOT when it is defined or referenced (Part 2).`` () =
         (fun () ->
             let f a =
-                failwith "An exception will be thrown as soon as this is executed." //what is this line doing.  
+                failwith "An exception will be thrown as soon as this is executed."
                 a + 2
             f 1232 |> should equal 1234
         ) |> should throw typeof<System.Exception>

@@ -16,6 +16,7 @@ module ``05: To iterate is human; to recurse, divine`` =
                 | true -> converge (d+10) c (n+1) //if you removed the rec keyword above, you would get: The value or constructor 'converge' is not defined.
                 | false -> converge (d - 1) c (n+1)
             | true -> n
+
         converge 3 10 0 |> should equal 4 //just work through the function with good ol' pen & paper :)
 
     [<Test>]
@@ -30,4 +31,4 @@ module ``05: To iterate is human; to recurse, divine`` =
                 | false -> -1 + inner (count+1)
             inner sq
 
-        myfun 12 |> should equal 15
+        myfun 12 |> should equal 

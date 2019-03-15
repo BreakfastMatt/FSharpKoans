@@ -74,11 +74,10 @@ module ``08: The Good Kind of Discrimination`` =
         let rec depth x =
             match x with
             | Empty -> 0
-            | Node (_, a, b) -> 1 + max (depth a) (depth b)
-        let a = __ // <-- you may want to spread this over multiple lines and/or let-bindings ...!
-        depth a |> should equal 4
-
-        (*\\\
-        empty is 0
-        max depth (a) (depth b)
-        \\\*)
+            | Node (_, a, b) -> 1 + max (depth a) (depth b)\
+        //4 Nodes deep
+        let d = Node("string",Empty,Empty)
+        let c = Node ("string",d,Empty)
+        let b = Node ("string",c,Empty)
+        let a = Node("string",b,Empty)
+        depth a |> should equal 4 

@@ -17,6 +17,8 @@ module ``08: The Good Kind of Discrimination`` =
     | Mathematics
     | Economics
     | Management
+    | InformationSystems
+    | Entomology
 
     type UndergraduateDegree = 
     | BSc of Subject * Subject
@@ -33,9 +35,9 @@ module ``08: The Good Kind of Discrimination`` =
         let aDegree = BSc (Linguistics, ComputerScience)
         let anotherDegree = BPharm
         let philosopherKing = Masters Philosophy
-        aDegree |> should be ofType<FILL_ME_IN> 
-        anotherDegree |> should be ofType<FILL_ME_IN> 
-        philosopherKing |> should be ofType<FILL_ME_IN> 
+        aDegree |> should be ofType<UndergraduateDegree> 
+        anotherDegree |> should be ofType<UndergraduateDegree> 
+        philosopherKing |> should be ofType<PostgraduateDegree> 
    
     [<Test>]
     let ``02 Creating & pattern-matching a discriminated union`` () = 
@@ -44,14 +46,14 @@ module ``08: The Good Kind of Discrimination`` =
             | BSc (_, ComputerScience) | BSc (ComputerScience, _) -> "Good choice!"
             | BSc _ -> "!!SCIENCE!!"
             | BPharm -> "Meh, it's OK."
-            | FILL_ME_IN -> "Money, money, money."
-            | FILL_ME_IN -> "A thinker, eh?"
-        randomOpinion __ |> should equal "Good choice!"
-        randomOpinion __ |> should equal "!!SCIENCE!!"
+            | BCom (_, Management) | BCom (Management, _) -> "Money, money, money."
+            | BA (_,Philosophy) | BA (Philosophy,_) -> "A thinker, eh?"
+        randomOpinion (BSc (InformationSystems,ComputerScience)) |> should equal "Good choice!" //CS > IS
+        randomOpinion (BSc (Entomology,InformationSystems)) |> should equal "!!SCIENCE!!"
         randomOpinion (BCom (Management, Economics)) |> should equal "Money, money, money."
         randomOpinion (BCom (Linguistics, Management)) |> should equal "Money, money, money."
         randomOpinion (BA (Linguistics, Philosophy)) |> should equal "A thinker, eh?"
-        randomOpinion __ |> should equal "Meh, it's OK."
+        randomOpinion BPharm |> should equal "Meh, it's OK."
 
     type EquipmentStatus =
     | Available
@@ -60,8 +62,8 @@ module ``08: The Good Kind of Discrimination`` =
 
     [<Test>]
     let ``03 A discriminated union case with associated data is a function`` () =
-        Broken |> should be ofType<FILL_ME_IN>
-        Rented |> should be ofType<FILL_ME_IN>
+        Broken |> should be ofType<int->EquipmentStatus> //function of type int -> EquipmentStatus
+        Rented |> should be ofType<string->EquipmentStatus> //function of type string -> EquipmentStatus
 
     type BinaryTree =
     | Empty
@@ -75,3 +77,8 @@ module ``08: The Good Kind of Discrimination`` =
             | Node (_, a, b) -> 1 + max (depth a) (depth b)
         let a = __ // <-- you may want to spread this over multiple lines and/or let-bindings ...!
         depth a |> should equal 4
+
+        (*\\\
+        empty is 0
+        max depth (a) (depth b)
+        \\\*)

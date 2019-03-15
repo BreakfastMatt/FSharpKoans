@@ -273,6 +273,7 @@ module ``03: Putting the Function into Functional Programming`` =
         let add5 a = a + 5
         let double a = a * 2
         let i = add5 >> double//i = (a+5) * 2
+        //i = (a+5) * 2
         let j = double >> add5//j = (a*2) + 5
         let k = double >> double >> double//k = (((a * 2) * 2) * 2)
         let l = j >> i //([(a*2) + 5]+5) * 2

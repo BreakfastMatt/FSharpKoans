@@ -117,14 +117,21 @@ module ``14: List operations are so easy, you could make them yourself!`` =
     // Hint: https://msdn.microsoft.com/en-us/library/ee370378.aspx
     [<Test>]
     let ``08 Specified-function mapping, the easy way`` () =
-        __ (fun x -> x+1) [9;8;7] |> should equal [10;9;8]
-        __ ((*) 2) [9;8;7] |> should equal [18;16;14]
-        __ (fun x -> sprintf "%.2f wut?" x)  [9.3; 1.22] |> should equal ["9.30 wut?"; "1.22 wut?"]
+        List.map (fun x -> x+1) [9;8;7] |> should equal [10;9;8]
+        List.map ((*) 2) [9;8;7] |> should equal [18;16;14]
+        List.map (fun x -> sprintf "%.2f wut?" x)  [9.3; 1.22] |> should equal ["9.30 wut?"; "1.22 wut?"]
 
     [<Test>]
     let ``09 Specified-function filtering, the hard way`` () =
         let filter (f : 'a -> bool) (xs : 'a list) : 'a list =
-            __ // write a function which filters based on the specified criteria
+            let rec inner (xs: 'a list) out = // write a function which filters based on the specified criteria
+              match xs with
+              | [] -> out
+              | head::rest -> 
+              match f head with
+              |true -> inner rest (out@[(head)])
+              |_ -> inner rest out
+            inner xs []
         filter (fun x -> x > 19) [9; 5; 23; 66; 4] |> should equal [23; 66]
         filter (fun x -> String.length x = 4) ["moo"; "woof"; "yip"; "nyan"; "meow"]
         |> should equal ["woof"; "nyan"; "meow"]
@@ -133,15 +140,22 @@ module ``14: List operations are so easy, you could make them yourself!`` =
     // Hint: https://msdn.microsoft.com/en-us/library/ee370294.aspx
     [<Test>]
     let ``10 Specified-function filtering, the easy way`` () =
-        __ (fun x -> x > 19) [9; 5; 23; 66; 4] |> should equal [23; 66]
-        __ (fun x -> String.length x = 4) ["moo"; "woof"; "yip"; "nyan"; "meow"]
+        List.filter (fun x -> x > 19) [9; 5; 23; 66; 4] |> should equal [23; 66]
+        List.filter (fun x -> String.length x = 4) ["moo"; "woof"; "yip"; "nyan"; "meow"]
         |> should equal ["woof"; "nyan"; "meow"]
-        __ (fun (a,b) -> a*b >= 14) [9,3; 4,2; 4,5] |> should equal [9,3; 4,5]
+        List.filter (fun (a,b) -> a*b >= 14) [9,3; 4,2; 4,5] |> should equal [9,3; 4,5]
 
     [<Test>]
     let ``11 Fixed-function filtering, the hard way`` () =
         let filter (xs : int list) : int list =
-            __ // write a function to filter for odd elements only.
+            let rec inner (xs: 'a list) out = // write a function to filter for odd elements only.
+              match xs with
+              | [] -> out
+              | head::rest -> 
+              match head%2 with
+              |0 -> inner rest out
+              |_ -> inner rest (out@[(head)])
+            inner xs []
         filter [1; 2; 3; 4] |> should equal [1; 3]
         filter [10; 9; 8; 7] |> should equal [9; 7]
         filter [15; 2; 7] |> should equal [15; 7]
@@ -159,7 +173,14 @@ module ``14: List operations are so easy, you could make them yourself!`` =
     [<Test>]
     let ``12 Specified-function filtering, the hard way`` () =
         let filter (f : 'a -> bool) (xs : 'a list) : 'a list =
-            __ // write a function which filters based on the specified criteria
+            let rec inner (xs: 'a list) out = // write a function which filters based on the specified criteria
+              match xs with
+              | [] -> out
+              | head::rest -> 
+              match f head with
+              |true -> inner rest (out@[(head)])
+              |_ -> inner rest out
+            inner xs []
         filter (fun x -> x > 19) [9; 5; 23; 66; 4] |> should equal [23; 66]
         filter (fun x -> String.length x = 4) ["moo"; "woof"; "yip"; "nyan"; "meow"]
         |> should equal ["woof"; "nyan"; "meow"]
@@ -168,10 +189,10 @@ module ``14: List operations are so easy, you could make them yourself!`` =
     // Hint: https://msdn.microsoft.com/en-us/library/ee370294.aspx
     [<Test>]
     let ``13 Specified-function filtering, the easy way`` () =
-        __ (fun x -> x > 19) [9; 5; 23; 66; 4] |> should equal [23; 66]
-        __ (fun x -> String.length x = 4) ["moo"; "woof"; "yip"; "nyan"; "meow"]
+        List.filter (fun x -> x > 19) [9; 5; 23; 66; 4] |> should equal [23; 66]
+        List.filter (fun x -> String.length x = 4) ["moo"; "woof"; "yip"; "nyan"; "meow"]
         |> should equal ["woof"; "nyan"; "meow"]
-        __ (fun (a,b) -> a*b >= 14) [9,3; 4,2; 4,5] |> should equal [9,3; 4,5]
+        List.filter (fun (a,b) -> a*b >= 14) [9,3; 4,2; 4,5] |> should equal [9,3; 4,5]
 
 (*
 A 'fold' starts from a specified state, and generates more states depending
@@ -205,48 +226,72 @@ or something else), it's likely that you'll be able to use a fold.
 
     [<Test>]
     let ``14 A fold which sums a list`` () =
-        let fold initialState xs =
-            __ // write a function to do what's described above
+        let fold (initialState:int) (xs:int list) =
+            let xs = initialState::xs
+            let rec inner xs out = // write a function to do what's described above
+              match xs with
+              | [] -> out
+              | head::rest -> inner rest (out+head)
+            inner xs 0
         fold 0 [1; 2; 3; 4] |> should equal 10
         fold 100 [2;4;6;8] |> should equal 120
 
     [<Test>]
     let ``15 A fold which multiplies a list`` () =
-        let fold initialState xs =
-            __ // write a function to multiply the elements of a list
-        fold __ [99] |> should equal 99
-        fold 2 [__] |> should equal 22
-        fold __ [1;3;5;7] |> should equal 105
-        fold __ [2;5;3] |> should equal 0
+        let fold initialState xs = 
+            let rec inner xs out = // write a function to multiply the elements of a list
+              match xs with
+              | [] -> out
+              | head::rest -> inner rest (out + (head*initialState))
+            inner xs 
+        fold 1 [99] |> should equal 99
+        fold 2 [11] |> should equal 22
+        fold 6 [1;3;5;7] |> should equal 108
+        fold 0 [2;5;3] |> should equal 0
 
     // you probably know the drill by now.  It'd be good to have
     // a function which does the state-generation stuff, wouldn't
     // it?
 
+
     [<Test>]
     let ``16 Folding, the hard way`` () =
-        let fold (f : 'a -> 'b -> 'a) (initialState : 'a) (xs : 'b list) : 'a =
-            __  // write a function to do a fold.
+        let fold (f : 'a -> 'b -> 'a) (initialState : 'a) (xs : 'b list) : 'a = 
+        (*
+            let rec inner (xs:'b list) = // write a function to do a fold.
+              match xs with
+              | [head] -> f head
+              | head::rest -> ((f head) + (inner rest))
+            inner xs 
+            *)
+            __ //couldn't get it to work D:
         fold (+) 0 [1;2;3;4] |> should equal 10
         fold (*) 2 [1;2;3;4] |> should equal 48
         fold (fun state item -> sprintf "%s %s" state item) "items:" ["dog"; "cat"; "bat"; "rat"]
         |> should equal "items: dog cat bat rat"
-        fold (fun state item -> state + float item + 0.5) 0.8 [1;3;5;7] |> should equal 18.8
+        fold (fun state item -> state + float item + 0.5) 0.8 [1.0;3.0;5.0;7.0] |> should equal 18.8
 
     // Hint: https://msdn.microsoft.com/en-us/library/ee353894.aspx
     [<Test>]
     let ``17 Folding, the easy way`` () =
-        __ (+) 0 [1;2;3;4] |> should equal 10
-        __ (*) 2 [1;2;3;4] |> should equal 48
-        __ (fun state item -> sprintf "%s %s" state item) "items:" ["dog"; "cat"; "bat"; "rat"]
+        List.fold (+) 0 [1;2;3;4] |> should equal 10
+        List.fold (*) 2 [1;2;3;4] |> should equal 48
+        List.fold (fun state item -> sprintf "%s %s" state item) "items:" ["dog"; "cat"; "bat"; "rat"]
         |> should equal "items: dog cat bat rat"
-        __ (fun state item -> state + float item + 0.5) 0.8 [1;3;5;7] |> should equal 18.8
+        List.fold (fun state item -> state + float item + 0.5) 0.8 [1;3;5;7] |> should equal 18.8
 
     // List.exists
     [<Test>]
     let ``18 exists: finding whether any matching item exists`` () =
         let exists (f : 'a -> bool) (xs : 'a list) : bool =
-            __ // Does this: https://msdn.microsoft.com/en-us/library/ee370309.aspx
+            let rec inner xs out = // Does this: https://msdn.microsoft.com/en-us/library/ee370309.aspx
+              match xs with
+              | [] -> false
+              | head::rest -> 
+              match f head with
+              |true -> true
+              |_ -> inner rest out
+            inner xs false
         exists ((=) 4) [7;6;5;4;5] |> should equal true
         exists (fun x -> String.length x < 4) ["true"; "false"] |> should equal false
         exists (fun _ -> true) [] |> should equal false
@@ -255,7 +300,14 @@ or something else), it's likely that you'll be able to use a fold.
     [<Test>]
     let ``19 partition: splitting a list based on a criterion`` () =
         let partition (f : 'a -> bool) (xs : 'a list) : ('a list) * ('a list) =
-            __ // Does this: https://msdn.microsoft.com/en-us/library/ee353782.aspx
+            let rec inner xs (out1,out2) = // Does this: https://msdn.microsoft.com/en-us/library/ee353782.aspx
+              match xs with
+              | [] -> out1,out2
+              | head::rest -> 
+              match f head with
+              |true -> inner rest ((out1@[head]),(out2))
+              |_ -> inner rest (out1,(out2@[head]))
+            inner xs ([],[])
         let a, b = partition (fun x -> x%2=0) [1;2;3;4;5;6;7;8;9;10]
         a |> should equal [2;4;6;8;10]
         b |> should equal [1;3;5;7;9]
@@ -270,7 +322,11 @@ or something else), it's likely that you'll be able to use a fold.
     [<Test>]
     let ``20 init: creating a list based on a size and a function`` () =
         let init (n : int) (f : int -> 'a) : 'a list =
-            __ // Does this: https://msdn.microsoft.com/en-us/library/ee370497.aspx
+            let rec setupDatListYo daList count i = // Does this: https://msdn.microsoft.com/en-us/library/ee370497.aspx
+             match (i = count) with
+             |true -> daList
+             |_ -> setupDatListYo (daList@[f i]) count (i + 1)
+            setupDatListYo [] n 0
         init 10 (fun x -> x*2) |> should equal [0;2;4;6;8;10;12;14;16;18]
         init 4 (sprintf "(%d)") |> should equal ["(0)";"(1)";"(2)";"(3)"]
 
@@ -278,7 +334,14 @@ or something else), it's likely that you'll be able to use a fold.
     [<Test>]
     let ``21 tryFind: find the first matching element, if any`` () =
         let tryFind (p : 'a -> bool) (xs : 'a list) : 'a option =
-            __ // Does this: https://msdn.microsoft.com/en-us/library/ee353506.aspx
+            let rec inner xs out = // Does this: https://msdn.microsoft.com/en-us/library/ee353506.aspx
+              match xs with
+              | [] -> None
+              | head::rest -> 
+              match (p head) with
+              |true -> Some head
+              |_ -> inner rest out
+            inner xs None
         tryFind (fun x -> x<=45) [100;85;25;55;6] |> should equal (Some 25)
         tryFind (fun x -> x>450) [100;85;25;55;6] |> should equal None
 

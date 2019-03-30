@@ -238,15 +238,15 @@ or something else), it's likely that you'll be able to use a fold.
 
     [<Test>]
     let ``15 A fold which multiplies a list`` () =
-        let fold initialState xs = 
-            let rec inner xs out = // write a function to multiply the elements of a list
+        let fold (initialState) xs = 
+            let rec inner xs (out) = // write a function to multiply the elements of a list
               match xs with
               | [] -> out
               | head::rest -> inner rest (out + (head*initialState))
-            inner xs 
+            inner xs 0
         fold 1 [99] |> should equal 99
         fold 2 [11] |> should equal 22
-        fold 6 [1;3;5;7] |> should equal 108
+        fold 6 [1;3;5;7] |> should equal 96
         fold 0 [2;5;3] |> should equal 0
 
     // you probably know the drill by now.  It'd be good to have
@@ -257,14 +257,11 @@ or something else), it's likely that you'll be able to use a fold.
     [<Test>]
     let ``16 Folding, the hard way`` () =
         let fold (f : 'a -> 'b -> 'a) (initialState : 'a) (xs : 'b list) : 'a = 
-        (*
-            let rec inner (xs:'b list) = // write a function to do a fold.
-              match xs with
-              | [head] -> f head
-              | head::rest -> ((f head) + (inner rest))
-            inner xs 
-            *)
-            __ //couldn't get it to work D:
+            let rec inner xs initialState =
+                match xs with
+                | [] -> initialState
+                | head::rest -> inner rest (f (initialState) head)
+            inner xs initialState
         fold (+) 0 [1;2;3;4] |> should equal 10
         fold (*) 2 [1;2;3;4] |> should equal 48
         fold (fun state item -> sprintf "%s %s" state item) "items:" ["dog"; "cat"; "bat"; "rat"]
@@ -349,7 +346,14 @@ or something else), it's likely that you'll be able to use a fold.
     [<Test>]
     let ``22 tryPick: find the first matching element, if any, and transform it`` () =
         let tryPick (p : 'a -> 'b option) (xs : 'a list) : 'b option =
-            __ // Does this: https://msdn.microsoft.com/en-us/library/ee353814.aspx
+            let rec inner xs = // Does this: https://msdn.microsoft.com/en-us/library/ee353814.aspx
+                match xs with 
+                | [] -> None
+                | head::rest ->
+                match p head with 
+                | Some _ -> p head
+                | None -> inner rest
+            inner xs
         let f x =
             match x<=45 with
             | true -> Some(x*2)
@@ -379,7 +383,14 @@ or something else), it's likely that you'll be able to use a fold.
         // - why can't it take an 'a->'b, instead of an 'a->'b option ?
         // - why does it return a 'b list, and not a 'b list option ?
         let choose (p : 'a -> 'b option) (xs : 'a list) : 'b list =
-            __ // Does this: https://msdn.microsoft.com/en-us/library/ee353456.aspx
+            let rec inner xs out = // Does this: https://msdn.microsoft.com/en-us/library/ee353456.aspx
+                match xs with 
+                | [] -> out
+                | head::rest -> 
+                match p head with 
+                | Some a ->inner rest (out@[(a)])
+                | None -> inner rest out
+            inner xs []
         let f x =
             match x<=45 with
             | true -> Some(x*2)
@@ -397,7 +408,11 @@ or something else), it's likely that you'll be able to use a fold.
     [<Test>]
     let ``24 mapi: like map, but passes along an item index as well`` () =
         let mapi (f : int -> 'a -> 'b) (xs : 'a list) : 'b list =
-            __ // Does this: https://msdn.microsoft.com/en-us/library/ee353425.aspx
+            let rec inner (xs:'a list) (out:'b list) (i:int) = // Does this: https://msdn.microsoft.com/en-us/library/ee353425.aspx
+                match xs with
+                | [] -> out
+                | head::rest -> inner rest (out@[(f i head)]) (i+1)
+            inner xs [] 0
         mapi (fun i x -> -i, x+1) [9;8;7;6] |> should equal [0,10; -1,9; -2,8; -3,7]
         let hailstone i t =
             match i%2 with
